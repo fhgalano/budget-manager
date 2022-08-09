@@ -15,7 +15,7 @@ from definitions import ROOT_DIR
 logger = logging.getLogger(__name__)
 
 
-class Parser:
+class Processor:
     transaction_data: DataFrame
     db_connection: Connection
     db_file: Path
