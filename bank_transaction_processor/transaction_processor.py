@@ -51,7 +51,7 @@ class Processor:
 
     def upsert_transaction(self, transaction: Tuple):
         sql = '''INSERT INTO transactions
-        (date, seller, bank-category,budget-category, amount)
+        (date, seller, bank_transaction_processor-category,budget-category, amount)
         VALUES
         (?,?,?,?,?)'''
 
