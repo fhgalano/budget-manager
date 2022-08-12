@@ -6,7 +6,7 @@ import logging
 from pathlib import Path
 from typing import Tuple
 
-from sqlite3 import connect, version, Error, Connection
+from sqlite3 import connect, version, Error, Connection, Cursor
 from pandas import read_csv, DataFrame, Series
 from dotenv import load_dotenv
 
@@ -26,9 +26,8 @@ class Processor:
             transaction_csv
     ):
         self.db_file = db_file
-        self.transaction_data = self.convert_transaction_csv_to_dataframe(
-            transaction_csv
-        )
+        self.transaction_data = self._convert_transaction_csv_to_dataframe(
+            transaction_csv)
         self.db_connection = None
 
     def open_db_connection(self):
@@ -43,30 +42,47 @@ class Processor:
 
     def process_transactions(self):
         for transaction in self.transaction_data.iterrows():
-            transaction_tuple = self.format_transaction_for_db(transaction)
-            self.upsert_transaction(transaction_tuple)
+            if self._transaction_is_sale(transaction):
+                transaction_tuple = self.format_transaction_for_db(transaction)
+                self.upsert_transaction(transaction_tuple)
 
-    def format_transaction_for_db(self, transaction: Series):
+    def format_transaction_for_db(self, transaction: Series) -> Tuple:
         raise NotImplementedError
 
     def upsert_transaction(self, transaction: Tuple):
         sql = '''INSERT INTO transactions
-        (date, seller, bank_transaction_processor-category,budget-category, amount)
+        (date, seller, bank-category, budget-category, amount)
         VALUES
         (?,?,?,?,?)'''
 
+        self.db_connection.commit()
+
+    def _run_sql_query(self, query, options) -> Cursor:
         try:
             cursor = self.db_connection.cursor()
-            cursor.execute(sql, transaction)
-            self.db_connection.commit()
+            cursor.execute(query, options)
         except Error as e:
             logger.warning(e)
 
+        return cursor
+
+    def _get_budget_category(self, bank_category):
+        sql = '''SELECT * FROM transaction-category WHERE
+        bank-category=?'''
+
+        possible_categories = self._run_sql_query(sql, bank_category).fetchall()
+        # I don't
+
+
     @staticmethod
-    def convert_transaction_csv_to_dataframe(
+    def _convert_transaction_csv_to_dataframe(
             transaction_csv: str
     ) -> DataFrame:
         return read_csv(transaction_csv)
+
+    @staticmethod
+    def _transaction_is_sale(self, transaction: Series) -> bool:
+        raise NotImplementedError
 
 
 def _get_database_path():
