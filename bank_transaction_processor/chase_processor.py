@@ -12,9 +12,11 @@ class ChaseProcessor(Processor):
         :return: Tuple
         """
         date = transaction['Transaction Date']
-        seller = transaction['Description']
+        seller = self._clean_up_seller_name(transaction['Description'])
         bank_category = transaction['Category']
-        budget_category = 0  # TODO: Get the budget category from db
+        budget_category = None  # TODO: Get the budget category from db
+        # This could also be like a linking thing, so rather than the logic
+        # being about the query its just a link to another key in a table?
         amount = self._process_amount_signage(transaction['Amount'])
 
         return date, seller, bank_category, budget_category, amount
@@ -26,6 +28,8 @@ class ChaseProcessor(Processor):
     @staticmethod
     def _transaction_is_sale(self, transaction: Series) -> bool:
         if transaction['Type'] == 'Sale':
-            return True
+            transaction_type = True
         else:
-            return False
+            transaction_type = False
+
+        return transaction_type

@@ -10,7 +10,7 @@ from sqlite3 import connect, version, Error, Connection, Cursor
 from pandas import read_csv, DataFrame, Series
 from dotenv import load_dotenv
 
-from definitions import ROOT_DIR
+from definitions import ROOT_DIR, SYMBOLS
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class Processor:
         self.db_connection.close()
 
     def process_transactions(self):
-        for transaction in self.transaction_data.iterrows():
+        for idx, transaction in self.transaction_data.iterrows():
             if self._transaction_is_sale(transaction):
                 transaction_tuple = self.format_transaction_for_db(transaction)
                 self.upsert_transaction(transaction_tuple)
@@ -54,6 +54,8 @@ class Processor:
         (date, seller, bank-category, budget-category, amount)
         VALUES
         (?,?,?,?,?)'''
+
+        self._run_sql_query(sql, transaction)
 
         self.db_connection.commit()
 
@@ -71,8 +73,8 @@ class Processor:
         bank-category=?'''
 
         possible_categories = self._run_sql_query(sql, bank_category).fetchall()
-        # I don't
 
+        # need method to pick a category if multiple
 
     @staticmethod
     def _convert_transaction_csv_to_dataframe(
@@ -84,8 +86,24 @@ class Processor:
     def _transaction_is_sale(self, transaction: Series) -> bool:
         raise NotImplementedError
 
+    @staticmethod
+    def _clean_up_seller_name(category: str):
+        category.strip()
+        for sym in SYMBOLS:
+            category.replace(sym, '')
+
+        words = category.split(' ')
+
+        for word in words:
+            if word.isnumeric() or _string_is_empty(word):
+                words.remove(word)
+
 
 def _get_database_path():
     env_path = ROOT_DIR / '.env'
     load_dotenv(env_path)
     return getenv('DB_URL')
+
+
+def _string_is_empty(string):
+    return not bool(string)

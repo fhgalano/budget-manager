@@ -7,3 +7,5 @@ from pathlib import Path
 
 # Root Directory
 ROOT_DIR = Path(__file__).parent
+
+SYMBOLS = ['*', '#', '%', '(', ')', '-', '=', '"', '.', '/']
