@@ -13,7 +13,10 @@ SYMBOLS = ['*', '#', '%', '(', ')', '-', '=', '"', '.', '/', "'"]
 SELLER_NAME_MAP = {
     'nintendo': 'NINTENDO',
     'ebay': 'EBAY',
-    'patreon': 'PATREON'
+    'patreon': 'PATREON',
+    'youtube': 'YOUTUBE',
+    'vrv': 'VRV',
+    'doist': 'TODOIST'
 }
 POINT_OF_SALE = ['tst', 'sq', 'paypal']
 
