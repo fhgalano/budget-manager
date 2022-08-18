@@ -1,7 +1,6 @@
 """
 translates and writes transaction data to the db
 """
-from os import getenv
 from os.path import exists
 import logging
 from pathlib import Path
@@ -9,9 +8,8 @@ from typing import Tuple
 
 from sqlite3 import connect, version, Error, Connection, Cursor
 from pandas import read_csv, DataFrame, Series
-from dotenv import load_dotenv
 
-from definitions import ROOT_DIR, SYMBOLS, SELLER_NAME_MAP, POINT_OF_SALE
+from definitions import SYMBOLS, SELLER_NAME_MAP, POINT_OF_SALE
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +34,7 @@ class Processor:
             try:
                 self.db_connection = connect(self.db_file)
                 print(version)
-            except Error as e:
+            except Error as e:  # pragma: no cover
                 logger.warning("SQLite database connection failed: ", e)
 
     def close_db_connection(self):
@@ -47,14 +45,14 @@ class Processor:
         for idx, transaction in self.transaction_data.iterrows():
             if self._transaction_is_sale(transaction):
                 transaction_tuple = self.format_transaction_for_db(transaction)
-                self.upsert_transaction(transaction_tuple)
+                self.insert_transaction(transaction_tuple)
 
     def format_transaction_for_db(self, transaction: Series) -> Tuple:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
-    def upsert_transaction(self, transaction: Tuple):
+    def insert_transaction(self, transaction: Tuple):
         sql = '''INSERT INTO transactions
-        (date, seller, bank-category, budget-category, amount)
+        (date, seller, `bank-category`, `budget-category`, amount)
         VALUES
         (?,?,?,?,?)'''
 
@@ -66,19 +64,28 @@ class Processor:
         try:
             cursor = self.db_connection.cursor()
             cursor.execute(query, options)
-        except Error as e:
-            logger.warning(e)
+        except Error as e:  # pragma: no cover
+            logger.warning(f"{e}, {options}")
 
         return cursor
 
-    def _get_budget_category(self, bank_category):
-        sql = '''SELECT * FROM transaction-category WHERE
-        bank-category=?'''
+    def _get_budget_category(self, seller):
+        sql = '''SELECT * FROM `transaction-category` WHERE
+        `common-name`=(?)'''
 
         possible_categories = (
-            self._run_sql_query(sql, bank_category)
+            self._run_sql_query(sql, (seller,))
             .fetchall()
         )
+
+        if not possible_categories:
+            category = "Unknown"
+        elif len(possible_categories) == 1:
+            category = possible_categories[0][1]
+        else:
+            category = "Multiple"
+
+        return category
 
         # need method to pick a category if multiple
 
@@ -90,7 +97,7 @@ class Processor:
 
     @staticmethod
     def _transaction_is_sale(self, transaction: Series) -> bool:
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def _clean_up_seller_name(self, category: str):
         category.strip()
@@ -132,12 +139,6 @@ class Processor:
             return True
         else:
             return False
-
-
-def _get_database_path():
-    env_path = ROOT_DIR / '.env'
-    load_dotenv(env_path)
-    return getenv('DB_URL')
 
 
 def _db_file_exists(db_file: Path) -> bool:

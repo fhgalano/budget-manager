@@ -1,4 +1,4 @@
-from transaction_processor import Processor
+from bank_transaction_processor.transaction_processor import Processor
 from pandas import Series
 from typing import Tuple
 
@@ -14,9 +14,7 @@ class ChaseProcessor(Processor):
         date = transaction['Transaction Date']
         seller = self._clean_up_seller_name(transaction['Description'])
         bank_category = transaction['Category']
-        budget_category = None  # TODO: Get the budget category from db
-        # This could also be like a linking thing, so rather than the logic
-        # being about the query its just a link to another key in a table?
+        budget_category = self._get_budget_category(seller)
         amount = self._process_amount_signage(transaction['Amount'])
 
         return date, seller, bank_category, budget_category, amount
@@ -26,7 +24,7 @@ class ChaseProcessor(Processor):
         return abs(amount)
 
     @staticmethod
-    def _transaction_is_sale(self, transaction: Series) -> bool:
+    def _transaction_is_sale(transaction: Series) -> bool:
         if transaction['Type'] == 'Sale':
             transaction_type = True
         else:

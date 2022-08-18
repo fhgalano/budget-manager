@@ -8,4 +8,14 @@ from pathlib import Path
 # Root Directory
 ROOT_DIR = Path(__file__).parent
 
-SYMBOLS = ['*', '#', '%', '(', ')', '-', '=', '"', '.', '/']
+# References
+SYMBOLS = ['*', '#', '%', '(', ')', '-', '=', '"', '.', '/', "'"]
+SELLER_NAME_MAP = {
+    'nintendo': 'NINTENDO',
+    'ebay': 'EBAY',
+    'patreon': 'PATREON'
+}
+POINT_OF_SALE = ['tst', 'sq', 'paypal']
+
+# Tests
+TEST_RESOURCE_DIR = ROOT_DIR / 'tests/resources'
