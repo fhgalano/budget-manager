@@ -60,10 +60,41 @@ class Processor:
 
         self.db_connection.commit()
 
-    def _run_sql_query(self, query, options) -> Cursor:
+    def reprocess_budget_category(self):
+        get_data_sql = '''
+            SELECT
+                seller,
+                `budget-category`
+            FROM transactions
+        '''
+        transaction_data = self._run_sql_query(get_data_sql).fetchall()
+        # iterate through data
+        category_reprocessed_cache = []
+        for transaction in transaction_data:
+            seller = transaction[0]
+            budget_category = transaction[1]
+            if seller not in category_reprocessed_cache:
+                new_budget_category = self._get_budget_category(
+                    seller
+                )
+                if new_budget_category != budget_category:
+                    replace_sql = '''
+                        UPDATE transactions
+                        SET `budget-category` = (?)
+                        WHERE seller = (?)
+                    '''
+                    self._run_sql_query(
+                        replace_sql,
+                        (new_budget_category,
+                        seller)
+                    )
+
+                    self.db_connection.commit()
+
+    def _run_sql_query(self, query, *options) -> Cursor:
         try:
             cursor = self.db_connection.cursor()
-            cursor.execute(query, options)
+            cursor.execute(query, *options)
         except Error as e:  # pragma: no cover
             logger.warning(f"{e}, {options}")
 

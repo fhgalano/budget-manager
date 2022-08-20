@@ -1,5 +1,8 @@
 import pytest
 
+import string
+import random
+
 from pandas import read_csv
 from sqlite3 import Error
 
@@ -56,3 +59,35 @@ def test_clean_up_seller_name(processor, transaction_df):
     # TODO: Make the test have an actual assert
     for seller_name in test_cases:
         print(processor._clean_up_seller_name(seller_name))
+
+
+def test_reprocess_transactions(processor):
+    processor.open_db_connection()
+
+    # Generate random category
+    letters = string.ascii_uppercase
+    category = ''.join(random.choice(letters) for i in range(6))
+
+    # Change some categories
+    processor._run_sql_query('''
+    INSERT INTO `transaction-category` (`common-name`, `budget-category`)
+    VALUES ('TABLE22 NY', ?)
+    ''', [category])
+    processor.db_connection.commit()
+
+    # Reprocess
+    processor.reprocess_budget_category()
+
+    # Check that the change was captured
+    changed_transaction = processor._run_sql_query('''
+    SELECT * FROM transactions
+    WHERE seller = 'TABLE22 NY'    
+    ''').fetchall()
+
+    new_category = changed_transaction[0][3]
+
+    # delete changes
+    processor._run_sql_query('''DELETE FROM `transaction-category`;''')
+    processor.db_connection.commit()
+
+    assert new_category == category
