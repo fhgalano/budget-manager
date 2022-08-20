@@ -1,12 +1,11 @@
 """
 translates and writes transaction data to the db
 """
-from os.path import exists
 import logging
 from pathlib import Path
 from typing import Tuple
 
-from sqlite3 import connect, version, Error, Connection, Cursor
+from sqlite3 import Connection
 from pandas import read_csv, DataFrame, Series
 
 from budgetdb_communication_layer.sql_runner import Runner
