@@ -9,12 +9,13 @@ from typing import Tuple
 from sqlite3 import connect, version, Error, Connection, Cursor
 from pandas import read_csv, DataFrame, Series
 
+from budgetdb_communication_layer.sql_runner import Runner
 from definitions import SYMBOLS, SELLER_NAME_MAP, POINT_OF_SALE
 
 logger = logging.getLogger(__name__)
 
 
-class Processor:
+class Processor(Runner):
     transaction_data: DataFrame
     db_connection: Connection
     db_file: Path
@@ -27,18 +28,6 @@ class Processor:
         self.db_file = db_file
         self.transaction_data = self._convert_transaction_csv_to_dataframe(
             transaction_csv)
-        self.db_connection = None
-
-    def open_db_connection(self):
-        if _db_file_exists(self.db_file):
-            try:
-                self.db_connection = connect(self.db_file)
-                print(version)
-            except Error as e:  # pragma: no cover
-                logger.warning("SQLite database connection failed: ", e)
-
-    def close_db_connection(self):
-        self.db_connection.close()
         self.db_connection = None
 
     def process_transactions(self):
@@ -90,15 +79,6 @@ class Processor:
                     )
 
                     self.db_connection.commit()
-
-    def _run_sql_query(self, query, *options) -> Cursor:
-        try:
-            cursor = self.db_connection.cursor()
-            cursor.execute(query, *options)
-        except Error as e:  # pragma: no cover
-            logger.warning(f"{e}, {options}")
-
-        return cursor
 
     def _get_budget_category(self, seller):
         sql = '''SELECT * FROM `transaction-category` WHERE
@@ -170,11 +150,3 @@ class Processor:
             return True
         else:
             return False
-
-
-def _db_file_exists(db_file: Path) -> bool:
-    if not exists(db_file):
-        logger.warning(f"db file, {db_file}, does not exist")
-        raise Error("db does not exist at specified path")
-
-    return True
