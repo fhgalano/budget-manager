@@ -20,7 +20,7 @@ class Runner:
         self.db_connection = None
 
     def open_db_connection(self):
-        if _db_file_exists(self.db_file):
+        if db_file_exists(self.db_file):
             try:
                 self.db_connection = connect(self.db_file)
                 print(version)
@@ -41,7 +41,7 @@ class Runner:
         return cursor
 
 
-def _db_file_exists(db_file: Path) -> bool:
+def db_file_exists(db_file: Path) -> bool:
     if not exists(db_file):
         logger.warning(f"db file, {db_file}, does not exist")
         raise Error("db does not exist at specified path")

@@ -20,5 +20,7 @@ SELLER_NAME_MAP = {
 }
 POINT_OF_SALE = ['tst', 'sq', 'paypal']
 
+CYCLE_DATE = 24
+
 # Tests
 TEST_RESOURCE_DIR = ROOT_DIR / 'tests/resources'
