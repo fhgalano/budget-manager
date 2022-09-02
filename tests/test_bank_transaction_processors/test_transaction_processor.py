@@ -81,7 +81,7 @@ def test_reprocess_transactions(processor):
     # Check that the change was captured
     changed_transaction = processor._run_sql_query('''
     SELECT * FROM transactions
-    WHERE seller = 'TABLE22 NY'    
+    WHERE seller = 'TABLE22 NY'
     ''').fetchall()
 
     new_category = changed_transaction[0][3]
