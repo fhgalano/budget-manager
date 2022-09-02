@@ -4,6 +4,7 @@ translates and writes transaction data to the db
 import logging
 from pathlib import Path
 from typing import Tuple
+from datetime import datetime
 
 from sqlite3 import Connection
 from pandas import read_csv, DataFrame, Series
@@ -73,8 +74,7 @@ class Processor(Runner):
                     '''
                     self._run_sql_query(
                         replace_sql,
-                        (new_budget_category,
-                        seller)
+                        (new_budget_category, seller)
                     )
 
                     self.db_connection.commit()
@@ -149,3 +149,8 @@ class Processor(Runner):
             return True
         else:
             return False
+
+    @staticmethod
+    def _fix_date_format(date_string: str) -> str:
+        date_obj = datetime.strptime(date_string, '%m/%d/%Y')
+        return date_obj.strftime('%Y-%m-%d')

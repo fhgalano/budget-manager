@@ -1,6 +1,7 @@
-from bank_transaction_processor.transaction_processor import Processor
 from pandas import Series
 from typing import Tuple
+
+from bank_transaction_processor.transaction_processor import Processor
 
 
 class ChaseProcessor(Processor):
@@ -11,7 +12,7 @@ class ChaseProcessor(Processor):
         :param transaction:
         :return: Tuple
         """
-        date = transaction['Transaction Date']
+        date = self._fix_date_format(transaction['Transaction Date'])
         seller = self._clean_up_seller_name(transaction['Description'])
         bank_category = transaction['Category']
         budget_category = self._get_budget_category(seller)

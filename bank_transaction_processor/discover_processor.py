@@ -11,7 +11,7 @@ class DiscoverProcessor(Processor):
         :param transaction:
         :return: Tuple
         """
-        date = transaction['Trans. Date']
+        date = self._fix_date_format(transaction['Trans. Date'])
         seller = self._clean_up_seller_name(transaction['Description'])
         bank_category = transaction['Category']
         budget_category = self._get_budget_category(seller)
