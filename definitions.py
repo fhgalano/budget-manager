@@ -24,3 +24,6 @@ CYCLE_DATE = 24
 
 # Tests
 TEST_RESOURCE_DIR = ROOT_DIR / 'tests/resources'
+
+# Constants
+EXPECTED_COST_TOLERANCE = 0.2
