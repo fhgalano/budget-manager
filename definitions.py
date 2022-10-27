@@ -22,8 +22,11 @@ POINT_OF_SALE = ['tst', 'sq', 'paypal']
 
 CYCLE_DATE = 24
 
-# Tests
+# Test Variables
 TEST_RESOURCE_DIR = ROOT_DIR / 'tests/resources'
 
 # Constants
 EXPECTED_COST_TOLERANCE = 0.2
+
+# Locations
+PROCESSED_FILE_DIR = ROOT_DIR / 'transactions/'
