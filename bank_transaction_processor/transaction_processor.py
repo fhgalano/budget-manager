@@ -30,6 +30,11 @@ class Processor(Runner):
             transaction_csv)
         self.db_connection = None
 
+    def close(self):
+        self.db_file = None
+        self.transaction_data = None
+        self.close_db_connection()
+
     def process_transactions(self):
         for idx, transaction in self.transaction_data.iterrows():
             if self._transaction_is_sale(transaction):

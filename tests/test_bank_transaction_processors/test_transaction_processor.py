@@ -43,7 +43,7 @@ def test_open_db(processor, fake_processor):
 
 def test_close_db(processor):
     processor.open_db_connection()
-    processor.close_db_connection()
+    processor.close()
 
     assert processor.db_connection is None
 
