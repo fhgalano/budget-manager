@@ -36,6 +36,10 @@ def _get_all_files_in_dir(path: Path):
     all_files = [file for file in listdir(path)
                  if isfile(path / file)]
 
+    all_files.remove('cache')
+
+    all_files = [str(path / file) for file in all_files]
+
     return all_files
 
 
@@ -50,12 +54,12 @@ def run_report_for_this_month():
     return report
 
 
-def load_new_transactions_to_db():
+def load_new_transactions_to_db(filepath='./transactions/', db='DB_URL'):
     # get list of files in dir
-    path = Path('./transactions/')
+    path = Path(filepath)
     files = _get_all_files_in_dir(path)
 
-    loader = TransactionLoader()
+    loader = TransactionLoader(db=db)
     loader.process_files(files)
 
 
