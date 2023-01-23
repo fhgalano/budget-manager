@@ -18,11 +18,16 @@ class TransactionLoader:
 
     def __init__(
             self,
-            cache=json.loads(PROCESSED_FILE_DIR / 'cache'),
+            cache_path=PROCESSED_FILE_DIR / 'cache',
             db='DB_URL'
     ):
         self._db = db
-        self.cache = cache
+        self.cache_path = cache_path
+        with self.cache_path.open() as f:
+            try:
+                self.cache = json.loads(f.read())
+            except:
+                self.cache = {}
 
     def process_files(self, files: list):
         for file in files:
@@ -31,6 +36,7 @@ class TransactionLoader:
             else:
                 self._process_file_with_correct_processor(file)
                 self._add_file_to_cache(file)
+        self._write_cache()
 
     def _process_file_with_correct_processor(self, file: str):
         processor = self._get_correct_processor(file)
@@ -39,7 +45,7 @@ class TransactionLoader:
 
     def _add_file_to_cache(self, file: str):
         self.cache.update(
-            {file, datetime.now.strftime("%m/%d/%Y, %H:%M:%S")}
+            {file: datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}
         )
 
     def _get_correct_processor(self, file: str):
@@ -49,3 +55,7 @@ class TransactionLoader:
             processor = DiscoverProcessor(get_database_path(self._db), file)
 
         return processor
+
+    def _write_cache(self):
+        with open(self.cache_path, 'w') as fp:
+            json.dump(self.cache, fp)
