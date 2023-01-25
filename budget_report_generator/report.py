@@ -6,8 +6,9 @@ from typing import Dict
 
 from pandas import DataFrame
 
-spend_per_day = 38.15
-savings = 1000
+# TODO: this should be configured with something like a yaml rather than here?
+spend_per_day = 38.15 # TODO: what does this mean
+savings = 1000 # TODO: What is this for
 
 
 class Report:
@@ -27,6 +28,7 @@ class Report:
         print("\n----Summary----")
         self._print_summary(spend_summary)
 
+        spend_summary['categories'] = category_summary
         return spend_summary
 
     def _summarize_category_data(self):
