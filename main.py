@@ -4,6 +4,7 @@ from os.path import isfile
 import logging
 import datetime
 
+import argparse
 import dateutil.relativedelta
 from pathlib import Path
 
@@ -15,10 +16,19 @@ from definitions import CYCLE_DATE, PROCESSED_FILE_DIR
 
 logger = logging.getLogger(__name__)
 
+parser = argparse.ArgumentParser(
+    prog='Budget DB Manager',
+    description='enables transactions to be processed and reports to be'
+                'generated through the budgetDB',
+    epilog='deez nuts'
+)
+parser.add_argument('-pt', '--process-transactions', action='store_true')
+parser.add_argument('-cr', '--current-report', action='store_true')
+
 
 def _get_time_delta_for_current_cycle():
     today = datetime.datetime.today()
-    if today.day >= CYCLE_DATE:
+    if today.day > CYCLE_DATE:
         delta = dateutil.relativedelta.relativedelta(
             days=today.day - CYCLE_DATE
         )
@@ -64,5 +74,12 @@ def load_new_transactions_to_db(filepath='./transactions/', db='DB_URL'):
 
 
 if __name__ == "__main__":
-    load_new_transactions_to_db()
+    args = parser.parse_args()
+    if args.process_transactions:
+        print('Loading New Transactions...')
+        load_new_transactions_to_db()
+    if args.current_report:
+        print('Running Report...')
+        r = run_report_for_this_month()
+
     print('done')
