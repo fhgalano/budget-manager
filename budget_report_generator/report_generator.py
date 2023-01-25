@@ -127,10 +127,11 @@ class ReportGenerator(Runner):
             .set_index('common-name')
             .to_dict()['budget-category']
         )
-        transactions['budget-category'] = transactions.apply(
-            lambda row: categorized_transactions.get(row['seller'], 'Unknown'),
-            axis=1
-        )
+        if not transactions.empty:
+            transactions['budget-category'] = transactions.apply(
+                lambda row: categorized_transactions.get(row['seller'], 'Unknown'),
+                axis=1
+            )
 
         return transactions
 
