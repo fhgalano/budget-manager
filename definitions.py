@@ -22,6 +22,24 @@ POINT_OF_SALE = ['tst', 'sq', 'paypal']
 
 CYCLE_DATE = 24
 
+CATEGORIES = [
+    None,
+    'Groceries',
+    'Takeout',
+    'Coffee',
+    'Subscriptions',
+    'Entertainment',
+    'Stuff',
+    'Home',
+    'Transit',
+    'Health',
+    'Pets',
+    'Donations',
+    'Big Purchases',
+]
+
+TAKE_HOME = 4826
+
 # Test Variables
 TEST_RESOURCE_DIR = ROOT_DIR / 'tests/resources'
 

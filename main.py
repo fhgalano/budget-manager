@@ -26,15 +26,14 @@ parser.add_argument('-pt', '--process-transactions', action='store_true')
 parser.add_argument('-cr', '--current-report', action='store_true')
 
 
-def _get_time_delta_for_current_cycle():
-    today = datetime.datetime.today()
-    if today.day > CYCLE_DATE:
+def _get_time_delta_for_current_cycle(date):
+    if date.day > CYCLE_DATE:
         delta = dateutil.relativedelta.relativedelta(
-            days=today.day - CYCLE_DATE
+            days=date.day - CYCLE_DATE
         )
     else:
         delta = dateutil.relativedelta.relativedelta(
-            days=today.day - CYCLE_DATE,
+            days=date.day - CYCLE_DATE,
             months=1
         )
 
@@ -53,24 +52,31 @@ def _get_all_files_in_dir(path: Path):
     return all_files
 
 
-def run_report_for_this_month():
-    # get report for this month starting from today
-    time_delta = _get_time_delta_for_current_cycle()
+def run_report_for_date(date=datetime.datetime.today()):
+    # get report for this month starting from given day
+    time_delta = _get_time_delta_for_current_cycle(date)
 
     report = ReportGenerator().generate_report(
+        year=date.year,
+        month=date.month,
+        day=date.day,
         time_range=time_delta
     )
 
     return report
 
 
-def load_new_transactions_to_db(filepath='./transactions/', db='DB_URL'):
+def load_new_transactions_to_db(filepath=PROCESSED_FILE_DIR, db='DB_URL'):
     # get list of files in dir
     path = Path(filepath)
     files = _get_all_files_in_dir(path)
 
     loader = TransactionLoader(db=db)
     loader.process_files(files)
+
+
+def get_unknown_transactions():
+    pass
 
 
 if __name__ == "__main__":
@@ -80,6 +86,6 @@ if __name__ == "__main__":
         load_new_transactions_to_db()
     if args.current_report:
         print('Running Report...')
-        r = run_report_for_this_month()
+        r = run_report_for_date(date=datetime.date(2023, 1, 20))
 
     print('done')

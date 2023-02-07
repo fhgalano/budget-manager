@@ -56,7 +56,7 @@ class ReportGenerator(Runner):
         # create the report
         self.report = Report(category_report_data, date_range)
 
-        return self.report.create_report()
+        return self.report
 
     def _get_transactions_in_date_range(self, start_date, end_date) -> pandas.DataFrame:
         # get the data from the date range
