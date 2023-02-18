@@ -5,11 +5,9 @@ from database_interaction_tools.database_interaction_tools \
     import write_known_expense_to_db
 
 
-report = st.session_state.get('report')
-
-report.categories
-
 st.title("Manage Pre-Budgeted Expenses")
+
+report = st.session_state.get('report')
 
 if report is None:
     st.error("No Report Available")
@@ -17,7 +15,7 @@ if report is None:
 
 else:
     try:
-        st.write(report.get_known_transactions())
+        known = report.get_known_transactions()
         all_transactions = report.get_all_transactions()
     except:
         all_transactions = None
@@ -25,9 +23,14 @@ else:
     if all_transactions is None or all_transactions.empty:
         st.info('No Transactions in this Report')
     else:
-        all_transactions
+        st.subheader('Known Transaction List')
+        st.dataframe(known, use_container_width=True)
+
+        st.subheader('All Transactions')
+        st.dataframe(all_transactions, use_container_width=True)
 
         with st.form(key='add_expense', clear_on_submit=True):
+            st.subheader('Add a Known Expense')
             c1, c2, c3, c4 = st.columns(4)
             name = c1.selectbox(
                 'Seller Name',
