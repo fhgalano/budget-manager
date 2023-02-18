@@ -86,6 +86,6 @@ if __name__ == "__main__":
         load_new_transactions_to_db()
     if args.current_report:
         print('Running Report...')
-        r = run_report_for_date(date=datetime.date(2023, 1, 20))
+        r = run_report_for_date(date=datetime.datetime.today())
 
     print('done')
