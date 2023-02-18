@@ -92,7 +92,7 @@ class ReportGenerator(Runner):
                 'expected-cost'])
             < name_matched_transactions[
                 'expected-cost'] * EXPECTED_COST_TOLERANCE
-        ).iloc[:, :5]
+        ).iloc[:, :5].dropna(how='all')
 
         filtered_transactions = pandas.concat(
             [transactions, cost_matched_transactions]
