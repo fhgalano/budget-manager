@@ -34,6 +34,7 @@ class Budget:
             self.spend_per_day = self.extra / 30.5
             self.savings = budget['savings']
             self.takehome = budget['take-home']
+            self.rent = budget['rent']
 
     def _get_expected_totals(self, expected):
         total = 0

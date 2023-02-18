@@ -6,8 +6,8 @@ from pandas import DataFrame
 from numpy.random import randn
 
 from main import run_report_for_date, load_new_transactions_to_db
+from budget_report_generator.report import Report
 from budget_report_generator.budget import Budget
-
 
 my_budget = Budget()
 
@@ -53,39 +53,60 @@ def generate_spending_wheel(categories):
     st.plotly_chart(fig, use_container_width=True)
 
 
-def display_metrics(current_report, previous_report):
-    print(current_report)
+def display_metrics(
+        current_report: Report,
+        previous_report: Report
+):
     rd, ad, sd = report_deltas(current_report, previous_report)
 
-    c1, c2, c3, c4 = st.columns(4)
+    with st.expander("Wallet Info", expanded=True):
+        c1, c2 = st.columns(2)
 
-    c1.metric('Expected Monthly Total', n2c(my_budget.extra))
-    c1.metric('Spent Total', n2c(current_report['spent']), n2c(sd),
-              delta_color='off')
-    c1.metric(
-        'Remaining Wallet {nice}'.format(
-            nice=":sunglasses:" if current_report['remaining'] > 0 else ""
-        ),
-        n2c(current_report['remaining']), n2c(rd))
+        # Row 0
+        c1.metric(
+            'Remaining Wallet {nice}'.format(
+                nice=":sunglasses:" if current_report.wallet_remaining > 0 else ""
+            ),
+            n2c(current_report.wallet_remaining),
+            n2c(rd),
+        )
+        c2.metric(
+            'Wallet Spent / Day', n2c(current_report.wallet_spend_per_day),
+            n2c(ad),
+            delta_color='inverse'
+        )
 
-    c2.metric('Raw Takehome', n2c(my_budget.takehome))
-    c2.metric('Raw Spent Total', current_report['raw_spent'])
+    with st.expander("Metrics", expanded=False):
+        c1, c2, c3 = st.columns(3)
 
-    c3.metric('Actual Spend / Day', n2c(current_report['ASPD']), n2c(ad),
-              delta_color='inverse')
-    c3.metric('Goal Spend per Day', n2c(my_budget.spend_per_day))
+        # Row 1
+        c1.metric('Takehome', n2c(my_budget.takehome))
+        c2.metric('Total Spent', n2c(current_report.total_spent))
+        c3.metric('Total Spent / Day', n2c(current_report.total_spent_per_day))
 
-    known = current_report['categories']['Known Expenses']
-    c4.metric('Pre Budgeted Expense Limit', n2c(my_budget.expected))
-    c4.metric('Pre Budgeted Spent', n2c(known))
-    c4.metric('Pre Budgeted Rate', n2c(current_report['PBSR']))
-    current_report
+        # Row 2
+        known = current_report.summary['categories']['Known Expenses']
+        c1.metric('Pre Budgeted Expense Limit', n2c(my_budget.expected))
+        c2.metric('Pre Budgeted Spent', n2c(known))
+        c3.metric('Pre Budgeted Spent / Day',
+                  n2c(current_report.known_spend_per_day))
+        # Row 3
+        c1.metric('Monthly Wallet', n2c(my_budget.extra))
+        c2.metric('Wallet Spent', n2c(current_report.wallet_spent), n2c(sd),
+                  delta_color='off')
+        c3.metric('Goal Spend per Day', n2c(my_budget.spend_per_day))
+
+        # Row 4
+        c1.metric('Expected Savings', n2c(current_report.expected_savings))
+        c2.metric('Current Savings', n2c(current_report.current_savings))
 
 
 def report_deltas(current_report, previous_report):
-    remain_delta = current_report['remaining'] - previous_report['remaining']
-    aspd_delta = current_report['ASPD'] - previous_report['ASPD']
-    spend_delta = current_report['spent'] - previous_report['spent']
+    remain_delta = current_report.wallet_remaining \
+                   - previous_report.wallet_remaining
+    aspd_delta = current_report.wallet_spend_per_day \
+                 - previous_report.wallet_spend_per_day
+    spend_delta = current_report.wallet_spent - previous_report.wallet_spent
 
     return remain_delta, aspd_delta, spend_delta
 
@@ -94,7 +115,6 @@ def report_deltas(current_report, previous_report):
 new_data_button = st.button("Load in New Transactions")
 if new_data_button:
     load_new_transactions_to_db()
-
 
 st.title('Budget Overview')
 custom_checkbox = st.checkbox(
@@ -136,15 +156,9 @@ if ((report := st.session_state.get('report'))
         st.session_state.get('date', datetime.datetime.today())
     ))
     generate_spending_wheel(report.summary['categories'])
-    display_metrics(report.summary, prev_report.summary)
+    display_metrics(report, prev_report)
 
     unknown = report.data.get('Unknown')
 
-    st.write(report.get_known_transactions()['amount'].sum())
-    st.write(my_budget.expected)
-    st.write(my_budget.extra)
-
     if report.get_known_transactions()['amount'].sum() > my_budget.expected:
-        st.error('Known Expenses higher than expected')
-
-
+        st.info('Known Expenses higher than expected')

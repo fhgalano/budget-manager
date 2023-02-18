@@ -8,7 +8,6 @@ from pandas import DataFrame, concat
 
 from budget_report_generator.budget import Budget
 
-
 my_budget = Budget()
 spend_per_day = my_budget.spend_per_day
 savings = my_budget.savings
@@ -16,9 +15,10 @@ savings_per_day = my_budget.savings / 30.5
 
 
 class Report:
-    total: float = 0
-    summary: dict
-    raw_total: float = 0
+    wallet_spent: float = 0
+    summary: dict = {}
+    total_spent: float = 0
+    excluded_categories = ['known expenses', 'big purchases']
 
     def __init__(self, data: Dict[str, DataFrame], date_range):
         self.data = data
@@ -29,21 +29,13 @@ class Report:
 
     def summarize_report(self):
         category_summary = self._summarize_category_data()
-        spend_summary = self._summarize_spending(category_summary)
+        self._summarize_spending(category_summary)
 
-        print('\n----Categories----')
-        self._print_summary(category_summary)
-        print("\n----Summary----")
-        self._print_summary(spend_summary)
-
-        spend_summary['categories'] = category_summary
-
-        self.summary = spend_summary
+        self.summary['categories'] = category_summary
 
     def get_all_transactions(self):
         all_transactions = DataFrame()
         for name, subreport in self.data.items():
-
             all_transactions = concat(
                 (all_transactions, subreport),
                 ignore_index=True
@@ -59,35 +51,36 @@ class Report:
         for name, subreport in self.data.items():
             subreport_total = subreport.amount.sum()
             print_data[name] = subreport_total
-            print(name.lower())
-            if name.lower() not in ['known expenses', 'big purchases']:
-                self.total += subreport_total
-                print('skipped')
-            self.raw_total += subreport_total
+            if name.lower() not in self.excluded_categories:
+                self.wallet_spent += subreport_total
+            self.total_spent += subreport_total
 
         return print_data
 
     def _summarize_spending(self, category_summary):
-        # TODO: This needs to be upgraded to use other budgeting tools.
-        #  For now it's just a constant
-        summary = {}
-        available = spend_per_day * self.date_range
-        summary['raw_spent'] = self.raw_total
-        summary['spent'] = self.total
-        summary['remaining'] = available - self.total
-        summary['savings'] = savings_per_day * self.date_range + summary['remaining']
-        # ASPD = Actual Spend Per Day
-        summary['ASPD'] = (
-                (available - summary['remaining']) / self.date_range
+        self.total_spent += my_budget.rent
+        self.total_spent_per_day = self.total_spent / self.date_range
+        self.available = spend_per_day * self.date_range
+        self.wallet_remaining = self.available - self.wallet_spent
+        self.current_savings = savings_per_day * self.date_range \
+            + self.wallet_remaining
+        self.wallet_spend_per_day = (
+                (self.available - self.wallet_remaining) / self.date_range
         )
-        summary['PBSR'] = category_summary['Known Expenses'] / self.date_range
+        self.known_spend_per_day = (
+                category_summary['Known Expenses'] / self.date_range
+        )
 
-        return summary
+        self.expected_savings = (
+                my_budget.savings
+                + (self.available - self.wallet_spend_per_day * 30.5)
+                + (my_budget.expected - self.known_spend_per_day * 30.5)
+        )
 
     @staticmethod
     def _print_summary(summary):
         for key, value in summary.items():
-            print(f'{key}: ${round(value,2)}')
+            print(f'{key}: ${round(value, 2)}')
 
     def _get_spending_config_data(self):
         pass  # pragma: no cover
