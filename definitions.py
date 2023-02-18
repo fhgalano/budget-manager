@@ -16,7 +16,8 @@ SELLER_NAME_MAP = {
     'patreon': 'PATREON',
     'youtube': 'YOUTUBE',
     'vrv': 'VRV',
-    'doist': 'TODOIST'
+    'doist': 'TODOIST',
+    'dropout': 'DROPOUT'
 }
 POINT_OF_SALE = ['tst', 'sq', 'paypal']
 
