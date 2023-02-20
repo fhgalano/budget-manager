@@ -13,7 +13,7 @@ my_budget = Budget()
 
 
 def current_day_report():
-    return run_report_for_date()
+    return run_report_for_date(date=datetime.datetime.today())
 
 
 def custom_date_report(date):
