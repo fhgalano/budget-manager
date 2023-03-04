@@ -20,10 +20,11 @@ class Report:
     total_spent: float = 0
     excluded_categories = ['known expenses', 'big purchases']
 
-    def __init__(self, data: Dict[str, DataFrame], date_range):
+    def __init__(self, data: Dict[str, DataFrame], date_range, pending):
         self.data = data
         self.date_range = date_range.days
         self.categories = list(data.keys())
+        self.pending = pending
 
         self.summarize_report()
 
@@ -58,7 +59,8 @@ class Report:
         return print_data
 
     def _summarize_spending(self, category_summary):
-        self.total_spent += my_budget.rent
+        self.total_spent += my_budget.rent + self.pending
+        self.wallet_spent += self.pending
         self.total_spent_per_day = self.total_spent / self.date_range
         self.available = spend_per_day * self.date_range
         self.wallet_remaining = self.available - self.wallet_spent

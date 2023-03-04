@@ -12,12 +12,12 @@ from budget_report_generator.budget import Budget
 my_budget = Budget()
 
 
-def current_day_report():
-    return run_report_for_date(date=datetime.datetime.today())
+def current_day_report(pending=0):
+    return run_report_for_date(date=datetime.datetime.today(), pending=pending)
 
 
-def custom_date_report(date):
-    return run_report_for_date(date=date)
+def custom_date_report(date, pending=0):
+    return run_report_for_date(date=date, pending=pending)
 
 
 def n2c(num):
@@ -87,6 +87,7 @@ def display_metrics(
         # Row 2
         known = current_report.summary['categories']['Known Expenses']
         c1.metric('Pre Budgeted Expense Limit', n2c(my_budget.expected))
+        print(current_report.summary)
         c2.metric('Pre Budgeted Spent', n2c(known))
         c3.metric('Pre Budgeted Spent / Day',
                   n2c(current_report.known_spend_per_day))
@@ -141,10 +142,11 @@ if custom_checkbox:
         st.session_state['date'] = date
 
 else:
+    pending = st.number_input('Pending Transaction Amount')
     if st.button('Run Report for Today'):
-        report = current_day_report()
+        report = current_day_report(pending=pending)
         prev_date = datetime.datetime.today() - datetime.timedelta(days=1)
-        prev_report = custom_date_report(prev_date)
+        prev_report = custom_date_report(prev_date, pending=pending)
 
         st.session_state['report'] = report
         st.session_state['previous_report'] = prev_report

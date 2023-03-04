@@ -52,15 +52,17 @@ def _get_all_files_in_dir(path: Path):
     return all_files
 
 
-def run_report_for_date(date=datetime.datetime.today()):
+def run_report_for_date(date=datetime.datetime.today(), pending: float = 0):
     # get report for this month starting from given day
     time_delta = _get_time_delta_for_current_cycle(date)
-
+    print(date)
+    print(time_delta)
     report = ReportGenerator().generate_report(
         year=date.year,
         month=date.month,
         day=date.day,
-        time_range=time_delta
+        time_range=time_delta,
+        pending=pending,
     )
 
     return report
@@ -86,6 +88,6 @@ if __name__ == "__main__":
         load_new_transactions_to_db()
     if args.current_report:
         print('Running Report...')
-        r = run_report_for_date(date=datetime.datetime.today())
+        r = run_report_for_date(date=datetime.datetime(day=24, month=2, year=2023))
 
     print('done')

@@ -25,6 +25,7 @@ class ReportGenerator(Runner):
                         month=date.today().month,
                         day=date.today().day,
                         time_range: relativedelta = relativedelta(months=1),
+                        pending: float = 0,
                         ):
         # Parse date range with defaults setup
         end_date = date(year, month, day)
@@ -54,7 +55,7 @@ class ReportGenerator(Runner):
         )
 
         # create the report
-        self.report = Report(category_report_data, date_range)
+        self.report = Report(category_report_data, date_range, pending=pending)
 
         return self.report
 
@@ -63,7 +64,7 @@ class ReportGenerator(Runner):
         date_range_query = '''
                 SELECT * FROM transactions
                 WHERE
-                    DATE(date) BETWEEN DATE(?) AND DATE(?)
+                    DATE(date) > DATE(?) AND DATE(date) <= DATE(?)
                 '''
 
         cursor = self._run_sql_query(
