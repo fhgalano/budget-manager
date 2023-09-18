@@ -1,0 +1,10 @@
+budget:
+  monthly:
+    take-home: 16000
+    rent: 9000
+    savings: 2000
+    expected:
+      recurring: 200
+      tacos: 300
+      internet: 100
+      donations: 132

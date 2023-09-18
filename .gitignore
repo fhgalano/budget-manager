@@ -1,0 +1,8 @@
+.env
+.idea
+.coverage
+budget_report_generator/spending_config.yaml
+tests/resources/test_budget_db.db
+tests/resources/discover_test_transactions.csv
+tests/resources/test_budget_db_full.db
+transactions/*
