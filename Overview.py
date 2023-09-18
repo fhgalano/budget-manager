@@ -3,9 +3,8 @@ import datetime
 import streamlit as st
 import plotly.express as px
 from pandas import DataFrame
-from numpy.random import randn
 
-from main import run_report_for_date, load_new_transactions_to_db
+from budget_manager.manager import run_report_for_date, load_new_transactions_to_db
 from budget_report_generator.report import Report
 from budget_report_generator.budget import Budget
 
