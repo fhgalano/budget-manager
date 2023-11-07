@@ -17,7 +17,9 @@ SELLER_NAME_MAP = {
     'youtube': 'YOUTUBE',
     'vrv': 'VRV',
     'doist': 'TODOIST',
-    'dropout': 'DROPOUT'
+    'dropout': 'DROPOUT',
+    'amazon': 'AMZN',
+    'spotify': "SPOTIFY",
 }
 POINT_OF_SALE = ['tst', 'sq', 'paypal']
 
